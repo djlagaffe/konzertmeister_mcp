@@ -108,7 +108,7 @@ Since the Konzertmeister API is a simple REST API, you can also call it directly
 
 ## Example Prompts (Claude)
 
-> "Show me all upcoming rehearsals for SMIE this year"
+> "Show me all upcoming rehearsals for my band this year"
 
 > "Who hasn't replied to the next concert yet?"
 
