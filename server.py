@@ -39,7 +39,7 @@ mcp = FastMCP(
     instructions=(
         "MCP server for Konzertmeister – a scheduling app for music associations. "
         "Use this to query appointments, member lists, RSVPs and real attendances "
-        "for your association (SMIE). All write operations require appropriate permissions."
+        "for your association. All write operations require appropriate permissions."
     ),
 )
 
