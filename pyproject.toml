@@ -10,7 +10,7 @@ dependencies = [
 ]
 
 [project.scripts]
-konzertmeister-mcp = "server:mcp.run"
+konzertmeister-mcp = "server:main"
 
 [build-system]
 requires = ["hatchling"]

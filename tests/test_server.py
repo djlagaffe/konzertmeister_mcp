@@ -61,5 +61,71 @@ class TransportTests(unittest.IsolatedAsyncioTestCase):
                 await server._get('/api/test')
 
 
+class ApiSyncTests(unittest.IsolatedAsyncioTestCase):
+    async def run_tool(self, tool, params):
+        seen = []
+
+        def handle(request):
+            seen.append(request)
+            return httpx.Response(200, json=[])
+
+        original = httpx.AsyncClient
+        client = lambda **kw: original(transport=httpx.MockTransport(handle), **kw)
+        with patch.object(server, 'API_KEY', secrets.token_hex(8)), patch.object(server.httpx, 'AsyncClient', client):
+            result = await tool(params)
+        return result, seen
+
+    async def test_tags_filter_is_sent(self):
+        _, seen = await self.run_tool(server.km_list_appointments,
+                                      server.ListAppointmentsInput(tags=['Gala']))
+        self.assertEqual(json.loads(seen[0].content)['tags'], ['Gala'])
+
+    async def test_member_properties_are_mapped(self):
+        params = server.AddMemberInput(mail='a@example.org', properties=[
+            {'property_ext_id': 'P1', 'value_number': 3}])
+        _, seen = await self.run_tool(server.km_add_member, params)
+        self.assertEqual(json.loads(seen[0].content)['properties'],
+                         [{'propertyExtId': 'P1', 'valueNumber': 3.0}])
+
+    async def test_property_needs_exactly_one_value(self):
+        params = server.UpdateMemberInput(mail='a@example.org', properties=[
+            {'property_ext_id': 'P1', 'value_string': 'x', 'value_boolean': True}])
+        result, seen = await self.run_tool(server.km_update_member, params)
+        self.assertIn('exactly one', result)
+        self.assertEqual(seen, [])
+
+    def test_input_validation(self):
+        bad = [(server.AddMemberInput, {'mail': 'not-an-email'}),
+               (server.ListAppointmentsInput, {'filter_start': '2025-01-01'}),
+               (server.ListAppointmentsInput, {'filter_start': '2025-01-01T10:00:00'}),
+               (server.ListAppointmentsInput, {'response_format': 'xml'}),
+               (server.CreateAppointmentInput, {
+                   'name': 'x', 'start_zoned': '2025-11-22T19:30:00+01:00',
+                   'appointment_template_ext_id': 'nope', 'creator_mail': 'a@example.org'})]
+        for model, data in bad:
+            with self.subTest(data=data), self.assertRaises(ValidationError):
+                model(**data)
+        server.ListAppointmentsInput(filter_start='2025-01-01T10:00:00+01:00')
+
+    def test_error_text_never_includes_response_body(self):
+        request = httpx.Request('GET', 'https://example.invalid')
+        response = httpx.Response(500, request=request, text='internal secret detail')
+        error = httpx.HTTPStatusError('x', request=request, response=response)
+        message = server._handle_error(error)
+        self.assertIn('500', message)
+        self.assertNotIn('secret', message)
+
+    def test_extra_appointment_fields_are_formatted(self):
+        text = server._fmt_appointment({'id': 1, 'name': 'n', 'active': False, 'cancelDescription': 'sick',
+                                        'timezoneId': 'Europe/Zurich', 'group': {'name': 'Brass'}})
+        for part in ('sick', 'Europe/Zurich', 'Brass'):
+            self.assertIn(part, text)
+
+    def test_cli_defaults_to_stdio(self):
+        with patch.object(server.mcp, 'run') as run:
+            server.main([])
+        run.assert_called_once_with(transport='stdio')
+
+
 if __name__ == '__main__':
     unittest.main()
