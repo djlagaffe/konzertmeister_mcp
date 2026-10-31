@@ -10,10 +10,12 @@
       "Read(~/.ssh/**)",
       "Bash(cat *.p12*)",
       "Bash(openssl pkcs12 *-passin*)",
-      "Bash(git push *)",
       "Bash(gh repo create *)",
       "Bash(team/publish.sh*)",
       "Bash(bash team/publish.sh*)"
+    ],
+    "ask": [
+      "Bash(git push *)"
     ]
   }
 }
