@@ -4,7 +4,7 @@ version = "1.0.0"
 description = "MCP server for the Konzertmeister scheduling app"
 requires-python = ">=3.11"
 dependencies = [
-    "mcp[cli]>=1.0.0,<2",
+    "mcp[cli]>=2.3.0,<3",
     "httpx>=0.27.0",
     "pydantic>=2.0.0",
 ]
