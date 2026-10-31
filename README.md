@@ -123,3 +123,26 @@ Since the Konzertmeister API is a simple REST API, you can also call it directly
 ## API Reference
 
 Full Swagger docs: https://redocly.github.io/redoc/?url=https://rest.konzertmeister.app/v3/api-docs/m2m
+
+## Development and maintenance
+
+```bash
+python -m venv .venv
+.venv/bin/python -m pip install . build
+KM_API_KEY= .venv/bin/python -m unittest discover -s tests -v
+bash team/check.sh
+.venv/bin/python -m build
+```
+
+CI checks Python 3.11 and 3.14 on pull requests, main updates and weekly. Tests use a mock HTTP transport;
+no live service or real API key is required. Weekly grouped Python updates and monthly Actions updates
+are proposed by Dependabot; major Python updates remain separate. No automatic merging is enabled.
+
+The Herdr kit uses a short maintenance path and resumable task checkpoints. Feature gates are documented
+in `team/process.md`. `docs/handoff.md` records where to resume; verify its commit before relying on it.
+
+TokenEconomizer is an opt-in Claude pilot, not globally installed. Use `bash team/economizer.sh status`,
+then `bash team/economizer.sh start` for a Herdr team or `bash team/economizer.sh claude` for one Claude session.
+The reviewed checkout is pinned in the wrapper; override its location with `ECONOMIZER_DIR`.
+Auxiliary model calls are off; tool pruning only proposes changes. Plain `team/start.sh` disables this pilot.
+No savings are claimed until comparable real tasks have been measured.

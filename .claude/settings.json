@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(**/*.p12)",
+      "Read(**/*.pfx)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(~/.ssh/**)",
+      "Bash(cat *.p12*)",
+      "Bash(openssl pkcs12 *-passin*)",
+      "Bash(git push *)",
+      "Bash(gh repo create *)",
+      "Bash(team/publish.sh*)",
+      "Bash(bash team/publish.sh*)"
+    ]
+  }
+}
